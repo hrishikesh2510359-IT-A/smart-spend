@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartSpend — Setup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f; --surface: #13131a; --surface2: #1c1c28;
+      --border: rgba(255,255,255,0.07); --text: #f0f0f8; --muted: #6b6b80;
+      --accent1: #ff6b35; --accent2: #7c3aed; --accent3: #06d6a0; --accent4: #ffd166;
+      --danger: #ff4757; --radius: 16px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    body::before {
+      content:''; position:fixed; inset:0;
+      background-image: linear-gradient(rgba(124,58,237,0.03) 1px,transparent 1px), linear-gradient(90deg,rgba(124,58,237,0.03) 1px,transparent 1px);
+      background-size:40px 40px; pointer-events:none; z-index:0;
+    }
+    .app { position:relative; z-index:1; max-width:680px; margin:0 auto; padding:40px 24px; }
+
+    .step-header { text-align:center; margin-bottom:40px; animation:fadeDown 0.5s ease both; }
+    .step-header h1 { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; letter-spacing:-1px; margin-bottom:8px; }
+    .step-header h1 span { color:var(--accent1); }
+    .step-header p { color:var(--muted); font-size:0.9rem; }
+
+    .progress-row {
+      display:flex; align-items:center; justify-content:center; gap:0;
+      margin-bottom:40px; animation:fadeDown 0.5s ease 0.1s both;
+    }
+    .step-dot {
+      width:36px; height:36px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Syne',sans-serif; font-size:0.82rem; font-weight:700;
+      border: 2px solid var(--border); color:var(--muted);
+      background:var(--surface); transition:all 0.3s; position:relative; z-index:1;
+    }
+    .step-dot.active { border-color:var(--accent2); color:var(--text); background:rgba(124,58,237,0.15); }
+    .step-dot.done { border-color:var(--accent3); color:var(--accent3); background:rgba(6,214,160,0.1); }
+    .step-line { width:60px; height:2px; background:var(--border); transition:background 0.3s; }
+    .step-line.done { background:var(--accent3); }
+
+    .step-panel { display:none; animation:fadeUp 0.4s ease both; }
+    .step-panel.active { display:block; }
+
+    .card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:20px; padding:32px; margin-bottom:20px;
+    }
+    .card-title {
+      font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700;
+      letter-spacing:-0.3px; margin-bottom:6px;
+    }
+    .card-sub { color:var(--muted); font-size:0.85rem; margin-bottom:24px; }
+
+    .form-group { margin-bottom:18px; }
+    .form-label { display:block; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.8px; color:var(--muted); margin-bottom:8px; }
+    .form-input {
+      width:100%; background:var(--surface2); border:1px solid var(--border);
+      border-radius:12px; padding:13px 16px; color:var(--text);
+      font-family:'DM Sans',sans-serif; font-size:0.95rem; transition:border-color 0.2s, box-shadow 0.2s; outline:none;
+    }
+    .form-input:focus { border-color:var(--accent2); box-shadow:0 0 0 3px rgba(124,58,237,0.1); }
+    .form-input::placeholder { color:var(--muted); }
+
+    .input-prefix-wrap { position:relative; }
+    .input-prefix {
+      position:absolute; left:14px; top:50%; transform:translateY(-50%);
+      color:var(--accent3); font-weight:600; font-size:1rem; pointer-events:none;
+    }
+    .input-prefix-wrap .form-input { padding-left:32px; }
+
+    .btn-primary {
+      padding:14px 28px; background:linear-gradient(135deg,var(--accent2),#a855f7);
+      border:none; border-radius:12px; color:white;
+      font-family:'Syne',sans-serif; font-size:0.95rem; font-weight:700;
+      cursor:pointer; transition:all 0.2s;
+    }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(124,58,237,0.35); }
+    .btn-secondary {
+      padding:14px 28px; background:var(--surface2); border:1px solid var(--border);
+      border-radius:12px; color:var(--muted);
+      font-family:'Syne',sans-serif; font-size:0.95rem; font-weight:600; cursor:pointer; transition:all 0.2s;
+    }
+    .btn-secondary:hover { border-color:rgba(255,255,255,0.15); color:var(--text); }
+
+    .btn-row { display:flex; gap:12px; justify-content:flex-end; margin-top:8px; }
+
+    /* Category builder */
+    .cat-add-row { display:flex; gap:10px; margin-bottom:16px; }
+    .cat-add-row .form-input { flex:1; }
+    .btn-add-cat {
+      padding:13px 18px; background:rgba(6,214,160,0.1); border:1px solid rgba(6,214,160,0.3);
+      border-radius:12px; color:var(--accent3); font-family:'Syne',sans-serif;
+      font-size:0.88rem; font-weight:700; cursor:pointer; transition:all 0.2s; white-space:nowrap;
+    }
+    .btn-add-cat:hover { background:rgba(6,214,160,0.2); }
+
+    .cat-list { display:flex; flex-direction:column; gap:8px; }
+    .cat-item {
+      display:flex; align-items:center; justify-content:space-between;
+      background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:12px 16px;
+      animation:fadeUp 0.2s ease both;
+    }
+    .cat-item-left { display:flex; align-items:center; gap:12px; }
+    .cat-dot { width:8px; height:8px; border-radius:50%; background:var(--accent3); }
+    .cat-name { font-size:0.9rem; font-weight:500; }
+    .cat-budget { font-family:'Syne',sans-serif; font-size:0.88rem; color:var(--accent4); }
+    .cat-remove { background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; padding:4px; transition:color 0.2s; }
+    .cat-remove:hover { color:var(--danger); }
+
+    .empty-cats { text-align:center; color:var(--muted); font-size:0.85rem; padding:20px 0; }
+
+    .error-msg {
+      background:rgba(255,71,87,0.1); border:1px solid rgba(255,71,87,0.3);
+      border-radius:10px; padding:10px 14px; font-size:0.82rem; color:#ff8a95;
+      margin-bottom:16px; display:none;
+    }
+    .error-msg.show { display:block; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <div class="step-header">
+    <h1>Welcome to Smart<span>Spend</span></h1>
+    <p>Let's set up your financial profile — takes less than 2 minutes.</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-row">
+    <div class="step-dot active" id="dot-1">1</div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-dot" id="dot-2">2</div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step-dot" id="dot-3">3</div>
+  </div>
+
+  <!-- STEP 1: Income -->
+  <div class="step-panel active" id="step-1">
+    <div class="card">
+      <div class="card-title">💰 Monthly Income</div>
+      <div class="card-sub">How much do you earn (or receive) each month?</div>
+      <div class="error-msg" id="err-1"></div>
+      <div class="form-group">
+        <label class="form-label">Monthly Income (₹)</label>
+        <div class="input-prefix-wrap">
+          <span class="input-prefix">₹</span>
+          <input class="form-input" id="income-amount" type="number" min="1" placeholder="e.g. 30000"/>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="saveIncome()">Next: Categories →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Categories -->
+  <div class="step-panel" id="step-2">
+    <div class="card">
+      <div class="card-title">📂 Budget Categories</div>
+      <div class="card-sub">Add categories like Food, Transport, Entertainment and set a monthly budget for each.</div>
+      <div class="error-msg" id="err-2"></div>
+      <div class="cat-add-row">
+        <input class="form-input" id="cat-name" type="text" placeholder="Category name (e.g. Food)"/>
+        <div class="input-prefix-wrap" style="width:160px">
+          <span class="input-prefix">₹</span>
+          <input class="form-input" id="cat-budget" type="number" min="1" placeholder="Budget"/>
+        </div>
+        <button class="btn-add-cat" onclick="addCategoryLocal()">+ Add</button>
+      </div>
+      <div class="cat-list" id="cat-list">
+        <div class="empty-cats" id="cat-empty">No categories yet. Add one above.</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goStep(1)">← Back</button>
+      <button class="btn-primary" onclick="saveCategories()">Next: Review →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Review -->
+  <div class="step-panel" id="step-3">
+    <div class="card">
+      <div class="card-title">✅ Review Your Setup</div>
+      <div class="card-sub">Everything look good? You can always change this later.</div>
+      <div id="review-content"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goStep(2)">← Back</button>
+      <button class="btn-primary" onclick="finishSetup()">Go to Dashboard →</button>
+    </div>
+  </div>
+
+</div>
+<script>
+  const BASE = 'http://127.0.0.1:5000';
+  const USER_ID = parseInt(localStorage.getItem('user_id') || '1');
+  let localCategories = [];
+  let monthlyIncome = 0;
+
+  function showErr(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg; el.classList.add('show');
+  }
+  function hideErr(id) { document.getElementById(id).classList.remove('show'); }
+
+  function goStep(n) {
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`step-${n}`).classList.add('active');
+    // Update dots
+    for (let i = 1; i <= 3; i++) {
+      const dot = document.getElementById(`dot-${i}`);
+      dot.classList.remove('active','done');
+      if (i < n) dot.classList.add('done');
+      else if (i === n) dot.classList.add('active');
+    }
+    for (let i = 1; i <= 2; i++) {
+      document.getElementById(`line-${i}`).classList.toggle('done', i < n);
+    }
+  }
+
+  async function saveIncome() {
+    hideErr('err-1');
+    const amount = parseFloat(document.getElementById('income-amount').value);
+    if (!amount || amount <= 0) return showErr('err-1', 'Please enter a valid income amount.');
+    try {
+      const res = await fetch(`${BASE}/setup-income`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ user_id: USER_ID, monthly_income: amount })
+      });
+      if (!res.ok) throw new Error();
+      monthlyIncome = amount;
+      goStep(2);
+    } catch { showErr('err-1', 'Could not save income. Is Flask running?'); }
+  }
+
+  function addCategoryLocal() {
+    hideErr('err-2');
+    const name = document.getElementById('cat-name').value.trim();
+    const budget = parseFloat(document.getElementById('cat-budget').value);
+    if (!name) return showErr('err-2', 'Please enter a category name.');
+    if (!budget || budget <= 0) return showErr('err-2', 'Please enter a valid budget amount.');
+    if (localCategories.find(c => c.name.toLowerCase() === name.toLowerCase()))
+      return showErr('err-2', 'This category already exists.');
+
+    localCategories.push({ name, budget });
+    document.getElementById('cat-name').value = '';
+    document.getElementById('cat-budget').value = '';
+    renderCatList();
+  }
+
+  function renderCatList() {
+    const list = document.getElementById('cat-list');
+    const empty = document.getElementById('cat-empty');
+    if (!localCategories.length) { empty.style.display = 'block'; list.innerHTML = ''; list.appendChild(empty); return; }
+    empty.style.display = 'none';
+    list.innerHTML = localCategories.map((c,i) => `
+      <div class="cat-item">
+        <div class="cat-item-left">
+          <div class="cat-dot"></div>
+          <div class="cat-name">${c.name}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="cat-budget">₹${c.budget.toLocaleString('en-IN')}/mo</div>
+          <button class="cat-remove" onclick="removeCat(${i})">✕</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function removeCat(i) { localCategories.splice(i, 1); renderCatList(); }
+
+  async function saveCategories() {
+    hideErr('err-2');
+    if (!localCategories.length) return showErr('err-2', 'Please add at least one category.');
+    try {
+      for (const cat of localCategories) {
+        await fetch(`${BASE}/add-category`, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ user_id: USER_ID, name: cat.name, budget: cat.budget })
+        });
+      }
+      renderReview();
+      goStep(3);
+    } catch { showErr('err-2', 'Could not save categories. Is Flask running?'); }
+  }
+
+  function renderReview() {
+    const fmt = n => '₹' + Number(n).toLocaleString('en-IN');
+    document.getElementById('review-content').innerHTML = `
+      <div style="background:var(--surface2);border-radius:12px;padding:16px;margin-bottom:12px">
+        <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px">Monthly Income</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--accent3)">${fmt(monthlyIncome)}</div>
+      </div>
+      <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">Categories</div>
+      ${localCategories.map(c => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:0.9rem">${c.name}</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent4)">${fmt(c.budget)}/mo</span>
+        </div>`).join('')}`;
+  }
+
+  function finishSetup() { window.location.href = '/dashboard'; }
+
+  // Enter on cat fields
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.activeElement.id === 'cat-budget') addCategoryLocal();
+  });
+</script>
+</body>
+</html>
